@@ -308,8 +308,8 @@ def addIssueActionState(dataJson: str):
     else:
         print(f"Issue {data.issue.id} not found")
 
-addIssueActionLabelStateCommands(opened)
-addIssueActionState(other)
+# addIssueActionLabelStateCommands(opened)
+# addIssueActionState(other)
 
 
 if __name__ == '__main__':
