@@ -37,6 +37,7 @@ def main():
                 print(f"{data.issue.id} is {data.action} updated")
             else:
                 print(f"{data.issue.id} not found")
+        ch.basic_ack(delivery_tag=method.delivery_tag)
 
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
