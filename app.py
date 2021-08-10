@@ -2,7 +2,9 @@ import sys
 from types import SimpleNamespace
 
 import pika
+import pika.exceptions
 import json
+
 from sqlalchemy import create_engine
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import sessionmaker
@@ -39,15 +41,27 @@ def main():
                 print(f"{data.issue.id} not found")
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
-    connection = pika.BlockingConnection(parameters)
-    channel = connection.channel()
-    channel.queue_declare(queue=RABBIT_QUEUE)
-    channel.basic_consume(RABBIT_QUEUE, callback)
-    print(' [*] Waiting for message. To exit press CTRL+C')
-    channel.start_consuming()
-
-
-
+    while True:
+        try:
+            connection = pika.BlockingConnection(parameters)
+            channel = connection.channel()
+            channel.basic_qos(prefetch_count=1)
+            channel.queue_declare(queue=RABBIT_QUEUE, durable=False, auto_delete=True)
+            channel.basic_consume(RABBIT_QUEUE, callback)
+            try:
+                channel.start_consuming()
+            except KeyboardInterrupt:
+                channel.stop_consuming()
+                connection.close()
+                break
+        except pika.exceptions.ConnectionClosedByBroker:
+            continue
+        except pika.exceptions.AMQPChannelError as ex:
+            print(f"Caught a channel error: {ex}, stopping...")
+            break
+        except pika.exceptions.AMQPConnectionError:
+            print("Connection was closed, retrying...")
+            continue
 
 
 def parseJson(dataJson: str) -> SimpleNamespace:
@@ -307,6 +321,7 @@ def addIssueActionState(dataJson: str):
             sessionAddIssueActionState.commit()
     else:
         print(f"Issue {data.issue.id} not found")
+
 
 # addIssueActionLabelStateCommands(opened)
 # addIssueActionState(other)
