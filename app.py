@@ -1,17 +1,15 @@
+import json
 import sys
 from types import SimpleNamespace
 
 import pika
 import pika.exceptions
-import json
-
 from sqlalchemy import create_engine
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import sessionmaker
 
 from config import *
 from models import *
-from testdata import opened, other
 
 engine = create_engine(DB_URL)
 dbSession = sessionmaker(bind=engine)
@@ -27,28 +25,29 @@ def main():
     parameters.credentials = credentials
 
     def callback(channel, method, properties, body):
-        if method.message_count:
-            data = parseJson(body.decode())
-            if data.action == 'opened':
-                addIssueActionLabelStateCommands(body.decode())
-                print(f"{data.issue.id} is {data.action} added")
+        data = parseJson(body.decode())
+        print("callback")
+        if data.action == 'opened':
+            addIssueActionLabelStateCommands(body.decode())
+            print(f"{data.issue.id} is {data.action} added")
+        else:
+            if isIssueExist(data.issue.id):
+                sessionAddIssueActionState = dbSession()
+                sessionAddIssueActionState.expire_on_commit = False
+                addIssueActionState(body.decode())
+                print(f"{data.issue.id} is {data.action} updated")
             else:
-                if isIssueExist(data.issue.id):
-                    sessionAddIssueActionState = dbSession()
-                    sessionAddIssueActionState.expire_on_commit = False
-                    addIssueActionState(body.decode())
-                    print(f"{data.issue.id} is {data.action} updated")
-                else:
-                    print(f"{data.issue.id} not found")
-            channel.basic_ack(delivery_tag=method.delivery_tag)
+                print(f"{data.issue.id} not found")
+        channel.basic_ack(delivery_tag=method.delivery_tag)
 
     while True:
         try:
             connection = pika.BlockingConnection(parameters)
             channel = connection.channel()
             channel.basic_qos(prefetch_count=1)
-            channel.queue_declare(queue=RABBIT_QUEUE, durable=False, auto_delete=True)
-            channel.basic_consume(RABBIT_QUEUE, callback)
+            channel.queue_declare(queue=RABBIT_QUEUE, durable=True)
+            channel.basic_consume(RABBIT_QUEUE, callback, auto_ack=True)
+            print("Wait")
             try:
                 channel.start_consuming()
             except KeyboardInterrupt:
