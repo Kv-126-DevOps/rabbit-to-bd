@@ -26,20 +26,21 @@ def main():
     # parameters.virtual_host
     parameters.credentials = credentials
 
-    def callback(ch, method, properties, body):
-        data = parseJson(body.decode())
-        if data.action == 'opened':
-            addIssueActionLabelStateCommands(body.decode())
-            print(f"{data.issue.id} is {data.action} added")
-        else:
-            if isIssueExist(data.issue.id):
-                sessionAddIssueActionState = dbSession()
-                sessionAddIssueActionState.expire_on_commit = False
-                addIssueActionState(body.decode())
-                print(f"{data.issue.id} is {data.action} updated")
+    def callback(channel, method, properties, body):
+        if method.message_count:
+            data = parseJson(body.decode())
+            if data.action == 'opened':
+                addIssueActionLabelStateCommands(body.decode())
+                print(f"{data.issue.id} is {data.action} added")
             else:
-                print(f"{data.issue.id} not found")
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+                if isIssueExist(data.issue.id):
+                    sessionAddIssueActionState = dbSession()
+                    sessionAddIssueActionState.expire_on_commit = False
+                    addIssueActionState(body.decode())
+                    print(f"{data.issue.id} is {data.action} updated")
+                else:
+                    print(f"{data.issue.id} not found")
+            channel.basic_ack(delivery_tag=method.delivery_tag)
 
     while True:
         try:
@@ -62,6 +63,8 @@ def main():
         except pika.exceptions.AMQPConnectionError:
             print("Connection was closed, retrying...")
             continue
+        except Exception as ex:
+            print(ex)
 
 
 def parseJson(dataJson: str) -> SimpleNamespace:
