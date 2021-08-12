@@ -23,9 +23,9 @@ class User(Base):
 
 class IssueAction(Base):
     __tablename__ = 'IssueActions'
-    IssueActionId = Column(Integer, primary_key=True)
-    IssueId = Column(ForeignKey('Issues.IssueId'))
-    ActionId = Column(ForeignKey('Actions.ActionId'))
+    # IssueActionId = Column(Integer, primary_key=True)
+    IssueId = Column(ForeignKey('Issues.IssueId'), primary_key=True)
+    ActionId = Column(ForeignKey('Actions.ActionId'), primary_key=True)
     UserId = Column(String, ForeignKey('Users.UserId'))
     ModifiedDate = Column(DateTime)
     Action = relationship("Action")
@@ -36,9 +36,12 @@ class IssueAction(Base):
         self.UserId = UserId
         self.ModifiedDate = ModifiedDate
 
-    def __init__(self, UserId, ModifiedDate):
-        self.UserId = UserId
-        self.ModifiedDate = ModifiedDate
+    def __repr__(self):
+        return f"IssueId: {self.IssueId}, " \
+               f"ActionId: {self.ActionId}, " \
+               f"UserId: {self.UserId}, " \
+               f"ModifiedDate: {self.ModifiedDate}"
+
 
 
 class Issue(Base):
@@ -105,9 +108,9 @@ class State(Base):
 
 class IssueLabel(Base):
     __tablename__ = 'IssueLabels'
-    IssueLabelId = Column(Integer, primary_key=True)
-    IssueId = Column(ForeignKey('Issues.IssueId'))
-    LabelId = Column(ForeignKey('Labels.LabelId'))
+    # IssueLabelId = Column(Integer, primary_key=True)
+    IssueId = Column(ForeignKey('Issues.IssueId'), primary_key=True)
+    LabelId = Column(ForeignKey('Labels.LabelId'), primary_key=True)
     Label = relationship("Label")
 
     def __repr__(self):
@@ -116,13 +119,15 @@ class IssueLabel(Base):
 
 class IssueState(Base):
     __tablename__ = 'IssueStates'
-    IssueStateId = Column(Integer, primary_key=True)
-    IssueId = Column(ForeignKey('Issues.IssueId'))
-    StateId = Column(ForeignKey('States.StateId'))
-    ModifiedDate = Column(DateTime)
+    # IssueStateId = Column(Integer, primary_key=True)
+    IssueId = Column(ForeignKey('Issues.IssueId'), primary_key=True)
+    StateId = Column(ForeignKey('States.StateId'), primary_key=True)
+    ModifiedDate = Column(String)
     State = relationship("State")
 
-    def __init__(self, ModifiedDate):
+    def __init__(self, IssueId, StateId, ModifiedDate):
+        self.IssueId = IssueId
+        self.StateId = StateId
         self.ModifiedDate = ModifiedDate
 
     def __repr__(self):
