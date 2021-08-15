@@ -7,9 +7,9 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'Users'
-    UserId = Column(String, primary_key=True)
-    HtmlUrl = Column(String, unique=True)
-    AvatarUrl = Column(String, unique=True)
+    UserId = Column(String(32), primary_key=True)
+    HtmlUrl = Column(String(512), unique=True)
+    AvatarUrl = Column(String(512), unique=True)
     IssueActions = relationship("IssueAction")
 
     def __init__(self, UserId, HtmlUrl, AvatarUrl):
@@ -23,10 +23,9 @@ class User(Base):
 
 class IssueAction(Base):
     __tablename__ = 'IssueActions'
-    # IssueActionId = Column(Integer, primary_key=True)
     IssueId = Column(ForeignKey('Issues.IssueId'), primary_key=True)
     ActionId = Column(ForeignKey('Actions.ActionId'), primary_key=True)
-    UserId = Column(String, ForeignKey('Users.UserId'))
+    UserId = Column(String(32), ForeignKey('Users.UserId'))
     ModifiedDate = Column(DateTime)
     Action = relationship("Action")
 
@@ -47,10 +46,10 @@ class IssueAction(Base):
 class Issue(Base):
     __tablename__ = 'Issues'
     IssueId = Column(Integer, primary_key=True)
-    HtmlUrl = Column(String)
+    HtmlUrl = Column(String(512))
     Number = Column(Integer)
-    Title = Column(String)
-    Body = Column(String)
+    Title = Column(String(32))
+    Body = Column(String(32))
     Actions = relationship("IssueAction")
     States = relationship("IssueState")
     Labels = relationship("IssueLabel")
@@ -73,7 +72,7 @@ class Issue(Base):
 class Action(Base):
     __tablename__ = 'Actions'
     ActionId = Column(Integer, primary_key=True)
-    Title = Column(String, unique=True)
+    Title = Column(String(32), unique=True)
 
     def __init__(self, Title):
         self.Title = Title
@@ -85,7 +84,7 @@ class Action(Base):
 class Label(Base):
     __tablename__ = 'Labels'
     LabelId = Column(Integer, primary_key=True)
-    Title = Column(String, unique=True)
+    Title = Column(String(32), unique=True)
 
     def __init__(self, Title):
         self.Title = Title
@@ -97,7 +96,7 @@ class Label(Base):
 class State(Base):
     __tablename__ = 'States'
     StateId = Column(Integer, primary_key=True)
-    Title = Column(String, unique=True)
+    Title = Column(String(32), unique=True)
 
     def __init__(self, Title):
         self.Title = Title
@@ -108,7 +107,6 @@ class State(Base):
 
 class IssueLabel(Base):
     __tablename__ = 'IssueLabels'
-    # IssueLabelId = Column(Integer, primary_key=True)
     IssueId = Column(ForeignKey('Issues.IssueId'), primary_key=True)
     LabelId = Column(ForeignKey('Labels.LabelId'), primary_key=True)
     Label = relationship("Label")
@@ -122,7 +120,7 @@ class IssueState(Base):
     # IssueStateId = Column(Integer, primary_key=True)
     IssueId = Column(ForeignKey('Issues.IssueId'), primary_key=True)
     StateId = Column(ForeignKey('States.StateId'), primary_key=True)
-    ModifiedDate = Column(String)
+    ModifiedDate = Column(DateTime)
     State = relationship("State")
 
     def __init__(self, IssueId, StateId, ModifiedDate):
