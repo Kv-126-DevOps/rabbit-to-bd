@@ -47,7 +47,7 @@ def addStateCommand(data) -> State:
     return addObjCommand(state, query)
 
 
-def addLabelsCommand(data):
+def addLabelsCommand(data) -> [Label]:
     """
     The function return list of Labels records from the db.
 
@@ -78,19 +78,19 @@ def addIssueCommand(data) -> Issue:
     return addObjCommand(issue, query)
 
 
-def addIssueActionCommand(data, issue, action) -> IssueAction:
+def addIssueActionCommand(data, user, action) -> IssueAction:
     """
     The function return IssueActions record from the db.
 
-    :param action: Action from models
-    :param issue: Issue from models
     :param data: JSON
-    :return: IssueActions from models
+    :param action: Action from models
+    :param user: User from models
+    :return: IssueAction from models
     """
 
-    issueAction = IssueAction(IssueId=issue.IssueId,
+    issueAction = IssueAction(IssueId=data.issue.id,
                               ActionId=action.ActionId,
-                              UserId=data.issue.user.login,
+                              UserId=user.UserId,
                               ModifiedDate=data.issue.data)
 
     query = Session.query(IssueAction).filter((IssueAction.IssueId == issueAction.IssueId)
@@ -99,8 +99,16 @@ def addIssueActionCommand(data, issue, action) -> IssueAction:
     return addObjCommand(issueAction, query)
 
 
-def addIssueStateCommand(data, issue, state):
-    issueState = IssueState(IssueId=issue.IssueId,
+def addIssueStateCommand(data, state) -> IssueState:
+    """
+    The function return IssueState record from the DB.
+
+    :param data: JSON
+    :param state: IssueState from models
+    :return: IssueState from models
+    """
+
+    issueState = IssueState(IssueId=data.issue.id,
                             StateId=state.StateId,
                             ModifiedDate=data.issue.data)
 
@@ -110,10 +118,17 @@ def addIssueStateCommand(data, issue, state):
     return addObjCommand(issueState, query)
 
 
-def addIssueLabelsCommand(data, issue: Issue, labels: []):
+def addIssueLabelsCommand(data, labels: [Label]) -> [IssueLabel]:
+    """
+    The function return IssueLabels record from the DB.
+
+    :param data: JSON
+    :param labels: The list of Labels
+    :return: List of Labels
+    """
     issueLabels = []
     for label in labels:
-        issueLabel = IssueLabel(IssueId=issue.IssueId,
+        issueLabel = IssueLabel(IssueId=data.issue.id,
                                 LabelId=label.LabelId)
         query = Session.query(IssueLabel).filter((IssueLabel.IssueId == issueLabel.IssueId)
                                                  & (IssueLabel.LabelId == issueLabel.LabelId))
@@ -122,6 +137,13 @@ def addIssueLabelsCommand(data, issue: Issue, labels: []):
 
 
 def addObjCommand(obj, query):
+    """
+    The function return obj record from the db.
+
+    :param obj: The model instance
+    :param query: Query to DB
+    :return: object from DB
+    """
     try:
         obj = query.one()
         print(f"Function addObjCommand() - {obj} exist")
@@ -141,7 +163,7 @@ def addNewIssueToDB(data):
     the records is added. And adds records to the IssueAction,
     IssueState, IssueLabel tables.
 
-    :param data:
+    :param data: JSON
     :return: None
     """
 
@@ -151,22 +173,21 @@ def addNewIssueToDB(data):
         action = addActionCommand(data)
         state = addStateCommand(data)
         labels = addLabelsCommand(data)
-        issueAction = addIssueActionCommand(data, issue, action)
-        issueState = addIssueStateCommand(data, issue, state)
-        issueLabels = addIssueLabelsCommand(data, issue, labels)
+        issueAction = addIssueActionCommand(data, user, action)
+        issueState = addIssueStateCommand(data, state)
+        issueLabels = addIssueLabelsCommand(data, labels)
 
 
 def updateIssue(data):
     if not data.action == 'opened' and isIssueExist(data.issue.id):
         user = addUserCommand(data)
-        issue = addIssueCommand(data)
         action = addActionCommand(data)
         state = addStateCommand(data)
-        issueAction = addIssueActionCommand(data, issue, action)
-        issueState = addIssueStateCommand(data, issue, state)
+        issueAction = addIssueActionCommand(data, user, action)
+        issueState = addIssueStateCommand(data, state)
 
 
-def isIssueExist(issueId):
+def isIssueExist(issueId) -> bool:
     isExist = False
     query = Session \
         .query(Issue) \

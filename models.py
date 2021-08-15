@@ -42,7 +42,6 @@ class IssueAction(Base):
                f"ModifiedDate: {self.ModifiedDate}"
 
 
-
 class Issue(Base):
     __tablename__ = 'Issues'
     IssueId = Column(Integer, primary_key=True)
@@ -53,6 +52,9 @@ class Issue(Base):
     Actions = relationship("IssueAction")
     States = relationship("IssueState")
     Labels = relationship("IssueLabel")
+
+    def __init__(self, IssueId):
+        self.IssueId = IssueId
 
     def __init__(self, IssueId, HtmlUrl, Number, Title, Body):
         self.IssueId = IssueId
