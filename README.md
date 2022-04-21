@@ -4,13 +4,15 @@ This application grabs data from RabbitMQ queue and saves to PostgreSQL database
 
 ## Installation
 
-### Create project folder
-    cd ..
-    sudo git clone -b develop https://github.com/Kv-DevOps-094/rabbit-to-bd.git
-    cd rabbit-to-bd
+### Create infrastructure
+    docker network create -d bridge kv126
+    docker run --network=kv126 -d --name postgres -e POSTGRES_USER=dbuser -e POSTGRES_PASSWORD=dbpass postgres
+    docker run --network=kv126 -d --name rabbit -e RABBITMQ_DEFAULT_USER=mquser -e RABBITMQ_DEFAULT_PASS=mqpass -p 15672:15672 rabbitmq:3.9-management
 
-### Create rabbit_to_postgres container
-    sudo docker build -t rabbit_to_postgres .
 
-### Run rabbit_to_postgres container
-    sudo docker run -h rabbit_to_postgres --name rabbit_to_postgres --net bridge_issue -d -e POSTGRES_HOST=postgres -e POSTGRES_PORT=5432 -e POSTGRES_USER=issueuser -e POSTGRES_PW=Init1234 -e POSTGRES_DB=issuedb -e RABBIT_HOST=15.237.25.152 -e RABBIT_PORT=5672 -e RABBIT_USER=devops -e RABBIT_PW=softserve -e RABBIT_QUEUE=restapi rabbit_to_postgres
+### Run rabbit-to-bd
+    git clone --branch develop https://github.com/Kv-126-DevOps/rabbit-to-bd.git /opt/rabbit-to-bd
+    docker run --network=kv126 -e POSTGRES_HOST=postgres -e POSTGRES_PORT=5432 -e POSTGRES_USER=dbuser -e POSTGRES_PW=dbpass -e POSTGRES_DB=postgres -e RABBIT_HOST=rabbit -e RABBIT_PORT=5672 -e RABBIT_USER=mquser -e RABBIT_PW=mqpass -e RABBIT_QUEUE=restapi -d --name rabbit-to-bd -v /opt/rabbit-to-bd:/app python:3.9-slim sleep infinity
+    docker exec rabbit-to-bd pip install -r /app/requirements.txt
+    docker exec -d rabbit-to-bd bash -c "cd /app && python ./app.py"
+
