@@ -4,19 +4,20 @@ import sys
 import pika
 import pika.exceptions
 
-from commands import *
+import commands
+import config
 from common import parseJson
-from config import *
+
 
 logging.basicConfig(filename='app.log', filemode='w', format='%(asctime)s - %(message)s', level=logging.INFO)
 
 
 def main():
     """RabbitMQ integration Component"""
-    credentials = pika.PlainCredentials(username=RABBIT_USER, password=RABBIT_PW)
+    credentials = pika.PlainCredentials(username=config.RABBIT_USER, password=config.RABBIT_PW)
     parameters = pika.ConnectionParameters()
-    parameters.host = RABBIT_HOST
-    parameters.port = RABBIT_PORT
+    parameters.host = config.RABBIT_HOST
+    parameters.port = config.RABBIT_PORT
     # parameters.virtual_host
     parameters.credentials = credentials
 
@@ -24,17 +25,17 @@ def main():
         data = parseJson(body.decode())
         print(body.decode())
         if data.action == 'opened':
-            addNewIssueToDB(data)
+            commands.addNewIssueToDB(data)
             logging.info(f"{data.issue.id} is {data.action} added")
             print("Issue added")
         else:
             print("Issue not opened")
-            if isIssueExist(data.issue.id):
-                updateIssue(data)
+            if commands.isIssueExist(data.issue.id):
+                commands.updateIssue(data)
                 logging.info(f"{data.issue.id} is {data.action} updated")
             else:
                 logging.info(f"{data.issue.id} not found")
-        print("Quenee clear")
+        print("Queue clear")
         channel.basic_ack(delivery_tag=method.delivery_tag)
 
     while True:
@@ -44,8 +45,8 @@ def main():
             channel = connection.channel()
 
             # channel.basic_qos(prefetch_count=1)
-            channel.queue_declare(queue=RABBIT_QUEUE)
-            channel.basic_consume(RABBIT_QUEUE, callback)
+            channel.queue_declare(queue=config.RABBIT_QUEUE)
+            channel.basic_consume(config.RABBIT_QUEUE, callback)
             try:
                 channel.start_consuming()
             except KeyboardInterrupt as ex:
