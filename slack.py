@@ -1,6 +1,6 @@
 import json
 import sys
-#import random
+import random
 import requests
 
 from config import *
