@@ -38,10 +38,6 @@ RABBIT_USER = getEnvVariable("RABBIT_USER")
 RABBIT_PW = getEnvVariable("RABBIT_PW")
 RABBIT_QUEUE = getEnvVariable("RABBIT_QUEUE")
 
-SLACK_URL = getEnvVariable("SLACK_URL")
-#SLACK_BUG = getEnvVariable("SLACK_BUG")
-#SLACK_US = getEnvVariable("SLACK_US")
-#SLACK_TC = getEnvVariable("SLACK_TC")
 
 POSTGRES_URL = f'postgresql://{POSTGRES_USER}:{POSTGRES_PW}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}'
 #MYSQL_URL = f'mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PW}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}'
