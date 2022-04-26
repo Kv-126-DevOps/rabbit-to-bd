@@ -8,6 +8,9 @@ import commands
 import config
 from common import parseJson
 
+#added from rabbit-to-slack
+import slack
+
 
 logging.basicConfig(filename='app.log', filemode='w', format='%(asctime)s - %(message)s', level=logging.INFO)
 
