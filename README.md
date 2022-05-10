@@ -6,17 +6,9 @@ Starting of the application creates Postgres Database with fields:  Actions, Iss
 ## Installation
 
 ### Prerequisites
-    Postgres Database
-    RabbitMQ
-    greenlet==1.1.2
-    pika==1.2.1
-    psycopg2-binary==2.9.3
-    python-dotenv==0.20.0
-    six==1.16.0
-    SQLAlchemy==1.4.36
-    SQLAlchemy-Utils==0.38.2
-    pika-stubs==0.1.3
-
+    Installed:
+      Postgres 
+      RabbitMQ
 
 ### Create infrastructure
     docker network create -d bridge kv126
