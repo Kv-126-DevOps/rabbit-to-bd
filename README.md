@@ -48,6 +48,8 @@ Parameters are set as environment variables
     Check if fields of the DB created:
       \dt+
     
+    Connect to the container with RabbitMQ and check created queue:
+      rabbitmqctl list_queues
 
 
 
