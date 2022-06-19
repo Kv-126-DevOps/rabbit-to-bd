@@ -8,17 +8,31 @@ from commands import *
 from common import parseJson
 from config import *
 
+import ssl
+
 logging.basicConfig(filename='app.log', filemode='w', format='%(asctime)s - %(message)s', level=logging.INFO)
 
 
 def main():
-    """RabbitMQ integration Component"""
-    credentials = pika.PlainCredentials(username=RABBIT_USER, password=RABBIT_PW)
-    parameters = pika.ConnectionParameters()
-    parameters.host = RABBIT_HOST
-    parameters.port = RABBIT_PORT
-    # parameters.virtual_host
-    parameters.credentials = credentials
+
+    MQ_CONNECTION = os.environ.get("MQ_CONNECTION")
+
+    if MQ_CONNECTION == 'SSL':
+        RABBIT_HOST = os.environ.get("RABBIT_HOST")
+        RABBIT_PORT = os.environ.get("RABBIT_PORT")
+        RABBIT_USER = os.environ.get("RABBIT_USER")
+        RABBIT_PW = os.environ.get("RABBIT_PW")
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+        ssl_context.set_ciphers('ECDHE+AESGCM:!ECDSA')
+        parameters = pika.URLParameters(f"amqp://{RABBIT_USER}:{RABBIT_PW}@{RABBIT_HOST}:{RABBIT_PORT}")
+        parameters.ssl_options = pika.SSLOptions(context=ssl_context)
+    else:
+        credentials = pika.PlainCredentials(username=RABBIT_USER, password=RABBIT_PW)
+        parameters = pika.ConnectionParameters()
+        parameters.host = RABBIT_HOST
+        parameters.port = RABBIT_PORT
+        parameters.credentials = credentials
+
 
     def callback(channel, method, properties, body):
         data = parseJson(body.decode())
