@@ -7,7 +7,7 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'Users'
-    UserId = Column(String(32), primary_key=True)
+    UserId = Column(String(512), primary_key=True)
     HtmlUrl = Column(String(512), unique=True)
     AvatarUrl = Column(String(512), unique=True)
     IssueActions = relationship("IssueAction")
@@ -25,7 +25,7 @@ class IssueAction(Base):
     __tablename__ = 'IssueActions'
     IssueId = Column(ForeignKey('Issues.IssueId'), primary_key=True)
     ActionId = Column(ForeignKey('Actions.ActionId'), primary_key=True)
-    UserId = Column(String(32), ForeignKey('Users.UserId'))
+    UserId = Column(String(512), ForeignKey('Users.UserId'))
     ModifiedDate = Column(DateTime)
     Action = relationship("Action")
 
@@ -47,8 +47,8 @@ class Issue(Base):
     IssueId = Column(Integer, primary_key=True)
     HtmlUrl = Column(String(512))
     Number = Column(Integer)
-    Title = Column(String(32))
-    Body = Column(String(32))
+    Title = Column(String(512))
+    Body = Column(String(512))
     Actions = relationship("IssueAction")
     States = relationship("IssueState")
     Labels = relationship("IssueLabel")
@@ -74,7 +74,7 @@ class Issue(Base):
 class Action(Base):
     __tablename__ = 'Actions'
     ActionId = Column(Integer, primary_key=True)
-    Title = Column(String(32), unique=True)
+    Title = Column(String(512), unique=True)
 
     def __init__(self, Title):
         self.Title = Title
@@ -86,7 +86,7 @@ class Action(Base):
 class Label(Base):
     __tablename__ = 'Labels'
     LabelId = Column(Integer, primary_key=True)
-    Title = Column(String(32), unique=True)
+    Title = Column(String(512), unique=True)
 
     def __init__(self, Title):
         self.Title = Title
@@ -98,7 +98,7 @@ class Label(Base):
 class State(Base):
     __tablename__ = 'States'
     StateId = Column(Integer, primary_key=True)
-    Title = Column(String(32), unique=True)
+    Title = Column(String(512), unique=True)
 
     def __init__(self, Title):
         self.Title = Title
